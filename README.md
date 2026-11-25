@@ -11,7 +11,7 @@ Entry for the [The Meeting That Should Have Been an Email](https://make.fun/boun
 `main.ts` writes exactly one line to `/output/entry.txt` — a single joke
 about a meeting that should have been an email:
 
-> Forty people, one hour, zero decisions: an email could have done that in eleven words.
+> The meeting's only output was another meeting, which is how calendars reproduce.
 
-86 characters, one line, verified byte-for-byte by a runtime guard in the
+80 characters, one line, verified byte-for-byte by a runtime guard in the
 program itself before it exits.

@@ -1,35 +1,30 @@
-// The Meeting That Should Have Been an Email — entry program (program/v1, node22).
-// Writes exactly one line to /output/entry.txt: a single joke about a
-// meeting that should have been an email, with no trailing newline so the
-// judged text is byte-exact.
-
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-const LINE =
-  "Forty people, one hour, zero decisions: an email could have done that in eleven words.";
+const OUTPUT_PATH = "/output/entry.txt";
+const JOKE = "The meeting's only output was another meeting, which is how calendars reproduce.";
 
-const OUT_PATH = "/output/entry.txt";
+function assertSingleLineWithinLimit(text: string): void {
+  const chars = [...text].length;
+  if (text.trim().length === 0) throw new Error("entry must not be whitespace only");
+  if (chars < 1 || chars > 200) {
+    throw new Error(`entry length out of range (1-200): ${chars}`);
+  }
+  if (text.includes("\n") || text.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
+  // Guard against accidental trailing spaces creeping into the shipped line.
+  if (text !== text.trim()) throw new Error("entry must not have surrounding whitespace");
+}
 
-mkdirSync(dirname(OUT_PATH), { recursive: true });
-writeFileSync(OUT_PATH, LINE, "utf8");
+function emitEntry(): void {
+  assertSingleLineWithinLimit(JOKE);
+  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
+  writeFileSync(OUTPUT_PATH, JOKE, "utf8");
+  const roundTripped = readFileSync(OUTPUT_PATH, "utf8");
+  if (roundTripped !== JOKE) {
+    throw new Error("output round-trip mismatch");
+  }
+}
 
-// Runtime guard: read the file back and refuse to finish silently if what
-// landed on disk is not the line, byte for byte. The sealed gate allows
-// 1–200 characters of non-whitespace text on a single line, and the entry
-// must be exactly this line — any drift here would be judged instead of
-// the intended joke.
-const written = readFileSync(OUT_PATH, "utf8");
-if (written !== LINE) {
-  throw new Error(
-    `entry.txt mismatch: expected ${LINE.length} chars, ` +
-      `got ${written.length} chars`,
-  );
-}
-if (written.length < 1 || written.length > 200 || !written.trim()) {
-  throw new Error("entry.txt fails the 1–200 non-whitespace character gate");
-}
-if (written.includes("\n")) {
-  throw new Error("entry.txt must be exactly one line");
-}
-console.log(`Wrote ${LINE.length} characters to ${OUT_PATH}`);
+emitEntry();
